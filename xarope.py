@@ -14,6 +14,11 @@ without having to install or build the Java version of Tubaina themselves
 import sys
 
 tubaina_style = """
+<style>
+
+.code {background: #a0a0c0;}
+
+</style>
 """
 
 # TAG PARAMETERS:
@@ -89,11 +94,26 @@ class Parser(object):
         # improve if the project ever grows
         inner_html = u""
         inside_list = False
-        inside_code = False
+        inside_code = 0
         prev = {"chapter": False, "section": False, "title": False}
         
+        code_text = u""
         for para in self._iter_paragraphs(text):
-            if not para.startswith(u"["): # Not a tubaina tag
+            if inside_code:
+                for line in para.split("\n"):
+                    if line.strip().startswith(u"[/code"):
+                        inside_code -= 1
+                        if inside_code == 0:
+                            inner_html += u"""<pre class="code"> %s </pre>\n""" % code_text
+                            inside_code = 0
+                            break
+                    # Allows nested code tags:
+                    if line.strip().startswith("[code"):
+                        inside_code += 1
+                    code_text += line + u"\n"
+                # Possible unwatched corner case: inline text after a "[/code]" closetag
+                continue
+            if not para.strip().startswith(u"["): # Not a tubaina tag
                 if not inside_list:
                     templ = u"<p>%s</p>\n"
                 else:
@@ -102,11 +122,12 @@ class Parser(object):
                 para_html = self._htmlize_paragraph(para)
                 inner_html += templ % para_html
             else:
-                tag_name = para.split()[0][1:]
+                tag_name = para.split()[0][1:].strip("]")
+                #sys.stderr.write(tag_name + "\n")
                 try:
                     parameter_spec = Tags[tag_name.lower()]
                 except KeyError:
-                    sys.stderr.write("""Unknown tubaina tag "%s", ignoring!\n""")
+                    sys.stderr.write("""Unknown tubaina tag "%s", ignoring!\n""" % tag_name)
                     continue
                 parameters = self._parse_parameters(para, parameter_spec)
                 if tag_name in ( "chapter", "section", "title"):
@@ -122,7 +143,11 @@ class Parser(object):
                     html %= (u"""width="%s" """ % parameters[1]) if len(parameters) >= 2 else u""
                     html += ("""<p class="caption">%s</p>""" % parameters[2]) if len(parameters) >= 3 else u""
                     inner_html += html
-                
+                elif tag_name == "code":
+                    #TODO: ignoring language sprc parameter for now.
+                    # in the future , make use of pygment, as used in the jva tubaina code.
+                    inside_code += 1
+                    
                     
         # Close open div tags from section, chapters and titles:
         for key, value in prev.items():
