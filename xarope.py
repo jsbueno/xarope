@@ -16,7 +16,7 @@ import sys
 tubaina_style = """
 <style>
 
-.code {background: #a0a0c0;}
+.code {background: #c0c0e0;}
 
 </style>
 """
@@ -85,9 +85,34 @@ class Parser(object):
                 yield u"\n".join(para)
                 para = []
             
+    def _xml_escape(self, text):
+        return text.replace(u"<", u"&lt;").replace(u">", "&gt;")
+        
     def _htmlize_paragraph(self, text):
-        # TODO: look for "%%", "**" and inline "[...]" tags 
-        return text
+        # TODO: look for inline "[...]" tags 
+        # FIXME: does not support nested %% and ** markups (** inside %% is treated as literal anyway)
+        text = self._xml_escape(text)
+        html = u""
+        index = 0
+        while True:
+            next_italic = text.find("%%", index)
+            next_bold = text.find("**", index)
+            next_tag = min(next_italic, next_bold)
+            if next_italic != -1 and (next_italic < next_bold or next_bold == -1) :
+                html += text[index: next_italic]
+                italic_end = text.find("%%", next_italic + 2)
+                html += u"<em>%s</em>" % text[next_italic + 2: italic_end]
+                index = italic_end + 2
+                continue
+            elif next_bold != -1:
+                html += text[index: next_bold]
+                bold_end = text.find("**", next_bold + 2)
+                html += u"<strong>%s</strong>" % text[next_bold + 2: bold_end]
+                index = bold_end + 2
+            elif next_bold == -1 and next_italic == -1:
+                html += text[index:]
+                break
+        return html
         
     def _htmlize(self, text):
         # Parse dierctly to HTML with hardcoded tags and classes
@@ -101,6 +126,7 @@ class Parser(object):
         for para in self._iter_paragraphs(text):
             if inside_code:
                 for line in para.split("\n"):
+                    line = self._xml_escape(line)
                     if line.strip().startswith(u"[/code"):
                         inside_code -= 1
                         if inside_code == 0:
