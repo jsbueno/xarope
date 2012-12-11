@@ -13,8 +13,6 @@ without having to install or build the Java version of Tubaina themselves
 """
 import sys
 
-from xml.etree import ElementTree as ET
-
 tubaina_style = """
 """
 
@@ -140,9 +138,10 @@ class Parser(object):
             if parameter_type == FREE:
                 parameters.append(text[index: text.find(u"]")].strip())
                 break
-            elif parameter_type in (SINGLE, PREFIX):
+            leading_whitespace = (len(text[index:]) - len(text[index:].lstrip()) ) 
+            if parameter_type in (SINGLE, PREFIX):
                 par_text = text[index:].strip().split()[0].strip().strip("]")
-                index += (len(text[index:]) - len(text[index:].lstrip()) ) + len(par_text)
+                index += leading_whitespace + len(par_text)
                 if parameter_type  == PREFIX:
                     par_text = par_text.split("=",1)[-1]
                 parameters.append(par_text)
@@ -151,7 +150,7 @@ class Parser(object):
                     par_text = text[index:].split('"')[1]
                 except IndexError:
                     pass
-                index += (len(text[index:]) - len(text[index:].lstrip())) + len(par_text) + 2
+                index += leading_whitespace + len(par_text) + 2
                 parameters.append(par_text)
         return parameters        
                 
