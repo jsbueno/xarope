@@ -11,7 +11,6 @@ This single script should provide  some quick and dirty output for
 authors which can thererfore preview their book output
 without having to install or build the Java version of Tubaina themselves
 """
-
 import sys
 
 from xml.etree import ElementTree as ET
@@ -25,8 +24,6 @@ SINGLE = 1 # Single, unseparated string
 STR = 2  # double quote '"'enclosed arg 
 #DASH = 3 # "--" prefixed  argv
 PREFIX = 4 # Paramter prefixed by "xx="  (currently only used in the "w=" witdth parameter for img tags)
-
-
 
 Tags = {
     "chapter": (FREE,),
@@ -157,43 +154,16 @@ class Parser(object):
                 index += (len(text[index:]) - len(text[index:].lstrip())) + len(par_text) + 2
                 parameters.append(par_text)
         return parameters        
-                            
                 
     def render_html(self, style=""):
         self.inner_html = self._htmlize(self.text)
         self.html = TEMPLATE % {"body": self.inner_html, "style": style}
         return self.html
-        
-    def parse(self):
-        # Currently unused stub - I would write code to parse this to 
-        # an elementtree DOM 
-        inside_pre_block = False
-        last_section = None
-        index = 0
-        self.xml = xml = ET.Element("html")
-        inner_xml = xml
-        inner_xml.append(ET.Element("body"))
-        last_xml = None
-        while True:
-            inner_index = index
-            while True:
-                # Find start of next tubaina tag:
-                candidate_next_tag = self.text.find("[", inner_index)
-                # check if the tag is not quoted out
-                if candidate_next_tag == -1:
-                    break
-                if self.text[candidate_next_tag -2: candidate_next_tag] == "%%":
-                    inner_index = candidate_next_tag + 1
-                
-                    
-                
-        
 
 def main(filename):
     doc = Parser(open(filename).read().decode("utf-8"))
-    html = doc.render_html(style="tubaina_style")
+    html = doc.render_html(style=tubaina_style)
     sys.stdout.write(html.encode("utf-8"))
-
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
