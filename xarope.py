@@ -2,6 +2,7 @@
 # coding: utf-8
 
 # Author: João S. O. Bueno
+# LICENSE: GPL v3.0 - for details, see the COPYING file
 
 """
 Simplified parser for Tubaina  (.afc) markup-code for books and e-books publishing
@@ -173,8 +174,6 @@ class Parser(object):
                     #TODO: ignoring language sprc parameter for now.
                     # in the future , make use of pygment, as used in the jva tubaina code.
                     inside_code += 1
-                    
-                    
         # Close open div tags from section, chapters and titles:
         for key, value in prev.items():
             if value:
