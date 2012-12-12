@@ -1,0 +1,18 @@
+The xarope project is a low profile, simple to run, renderer to
+"tubaina" files, as defined by the project currently at
+https://github.com/caelum/tubaina
+Unlike that java project, xarope aims to stay a single script, 
+with no other dependencies than a Python interpreter and
+the standard library - so that writers using the Tubaina
+markup language can preview their work without having to
+worry about complex installs or environment setups.
+
+
+This is an alpha-quality release, but maybe already useful
+for authors, since it can provide a visual clue to 
+the markup text.
+
+The code currently performs a hard coded conversion to simple
+HTML of individual chapter files, and ignores many of
+the less visual tags. (for example, references).
+
